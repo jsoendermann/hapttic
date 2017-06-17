@@ -1,8 +1,8 @@
 # Why would I want this?
 
-- You want to run some code in response to a webhook, for example a github push. For an example, see [pfeife](/jsoendermann/pfeife)
-- You have some code on your Raspberry Pi that you want to run from work (great in combination with [ngrok](https://ngrok.com/))
-- You want to convert a webhook into an API call.
+- You want to run some code in response to a webhook, like a github push ([This is what motivated me to write hapttic](/jsoendermann/pfeife)).
+- You have some code on your Raspberry Pi that you want to run from work (great in combination with [ngrok](https://ngrok.com/)).
+- That's pretty much it.
 
 # How does it work?
 
@@ -13,13 +13,12 @@ Hapttic dumps all the information in
 - example script
 - example docker compose
 - how to install (in a dockerfile)
-- will you add feature X?
 
 # FAQ
 
 ### Does hapttic come with support for SSL?
 
-You can add SSL to hapttic by putting an nginx proxy in front of it like so:
+You can add encryption by putting an nginx proxy in front of it with a docker-compose file like so:
 
 ```yaml
 version: '3'
@@ -37,7 +36,7 @@ services:
       - 443:443
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
-      - /var/letsencrypt_certs:/etc/nginx/certs:ro
+      - /var/certs:/etc/nginx/certs:ro
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
     labels:
@@ -48,7 +47,7 @@ services:
     image: jrcs/letsencrypt-nginx-proxy-companion
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /var/letsencrypt_certs:/etc/nginx/certs:rw
+      - /var/certs:/etc/nginx/certs:rw
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
 
@@ -56,9 +55,9 @@ services:
     restat: always
     image: TODO
     environment:
-      - VIRTUAL_HOST=hapttic.example.com                                                    # Replace this
-      - LETSENCRYPT_HOST=hapttic.example.com                                                # Replace this
-      - LETSENCRYPT_EMAIL=your@email.address                                                # Replace this
+      - VIRTUAL_HOST=hapttic.example.com                                                 # Replace this
+      - LETSENCRYPT_HOST=hapttic.example.com                                             # Replace this
+      - LETSENCRYPT_EMAIL=your@email.address                                             # Replace this
     depends_on:
       - nginx-proxy
       - letsencrypt-nginx-proxy-companion

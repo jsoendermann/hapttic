@@ -17,8 +17,6 @@ import (
 
 const version = "1.0.0"
 
-var scriptFileName *string
-
 type marshallableRequest struct {
 	Method string
 	URL    string
@@ -37,44 +35,46 @@ func init() {
 	log.SetOutput(os.Stdout)
 }
 
-func handleFunc(w http.ResponseWriter, req *http.Request) {
-	if _, err := os.Stat(*scriptFileName); os.IsNotExist(err) {
-		log.Fatal("The request handling script " + *scriptFileName + " does not exist.")
-	}
+func handleFuncWithScriptFileName(scriptFileName string) func(s http.ResponseWriter, req *http.Request) {
+	return func(res http.ResponseWriter, req *http.Request) {
+		if _, err := os.Stat(scriptFileName); os.IsNotExist(err) {
+			log.Fatal("The request handling script " + scriptFileName + " does not exist.")
+		}
 
-	bodyBuffer := new(bytes.Buffer)
-	bodyBuffer.ReadFrom(req.Body)
-	body := bodyBuffer.String()
+		bodyBuffer := new(bytes.Buffer)
+		bodyBuffer.ReadFrom(req.Body)
+		body := bodyBuffer.String()
 
-	req.ParseForm()
+		req.ParseForm()
 
-	marshallableReq := marshallableRequest{
-		Method: req.Method,
-		URL:    req.URL.String(),
-		Proto:  req.Proto,
-		Host:   req.Host,
+		marshallableReq := marshallableRequest{
+			Method: req.Method,
+			URL:    req.URL.String(),
+			Proto:  req.Proto,
+			Host:   req.Host,
 
-		Header: req.Header,
+			Header: req.Header,
 
-		ContentLength: req.ContentLength,
-		Body:          body,
-		Form:          req.Form,
-		PostForm:      req.PostForm,
-	}
+			ContentLength: req.ContentLength,
+			Body:          body,
+			Form:          req.Form,
+			PostForm:      req.PostForm,
+		}
 
-	requestJson, err := json.Marshal(marshallableReq)
-	if err != nil {
-		log.Fatal(err)
-	}
+		requestJSON, err := json.Marshal(marshallableReq)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	log.Println("Executing " + *scriptFileName)
+		log.Println("Executing " + scriptFileName)
 
-	out, err := exec.Command("/bin/bash", *scriptFileName, string(requestJson)).Output()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		io.WriteString(w, "500 Internal Server Error")
-	} else {
-		w.Write(out)
+		out, err := exec.Command("/bin/bash", scriptFileName, string(requestJSON)).Output()
+		if err != nil {
+			res.WriteHeader(http.StatusInternalServerError)
+			io.WriteString(res, "500 Internal Server Error")
+		} else {
+			res.Write(out)
+		}
 	}
 }
 
@@ -106,7 +106,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	http.HandleFunc("/", handleFunc)
+	http.HandleFunc("/", handleFuncWithScriptFileName(scriptFileName))
 
 	addr := *host + ":" + *port
 	log.Println("Thanks for using hapttic")

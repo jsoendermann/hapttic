@@ -36,13 +36,16 @@ func init() {
 	log.SetOutput(os.Stdout)
 }
 
+func ensureRequestHandlingScriptExists(scriptFileName string) {
+	if _, err := os.Stat(scriptFileName); os.IsNotExist(err) {
+		log.Fatal("The request handling script " + scriptFileName + " does not exist.")
+	}
+}
+
 // handleFuncWithScriptFileName constructs our handleFunc
 func handleFuncWithScriptFileName(scriptFileName string) func(s http.ResponseWriter, req *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
-		// First we make sure the script we are about to execute still exists
-		if _, err := os.Stat(scriptFileName); os.IsNotExist(err) {
-			log.Fatal("The request handling script " + scriptFileName + " does not exist.")
-		}
+		ensureRequestHandlingScriptExists(scriptFileName)
 
 		// This parses the request body
 		bodyBuffer := new(bytes.Buffer)
@@ -117,10 +120,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	ensureRequestHandlingScriptExists(scriptFileName)
+
 	http.HandleFunc("/", handleFuncWithScriptFileName(scriptFileName))
 
 	addr := *host + ":" + *port
-	log.Println("Thanks for using hapttic")
+	log.Println("Thanks for using hapttic v" + version)
 	log.Println(fmt.Sprintf("Listening on %s", addr))
 	log.Println(fmt.Sprintf("Forwarding requests to %s", scriptFileName))
 	log.Fatal(http.ListenAndServe(addr, nil))

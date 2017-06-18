@@ -14,9 +14,15 @@ Hapttic dumps all the information in
 - example docker compose
 - how to install (in a dockerfile)
 
+# Installation
+
+## Binaries
+
+## Docker
+
 # FAQ
 
-### Does hapttic come with support for SSL?
+## Does hapttic come with support for SSL?
 
 You can add encryption by putting an nginx proxy in front of it with a docker-compose file like so:
 
@@ -63,11 +69,11 @@ services:
       - letsencrypt-nginx-proxy-companion
 ```
 
-### Will you add feature X?
+## Will you add feature X?
 
 Probably not, the primary goal of hapttic is ease of use. Check out shell2http or adnanh/webhook for more feature rich alternatives.
 
-### Will this work on Windows?
+## Will this work on Windows?
 
 Probably not because the path to "/bin/bash" is hardcoded. Pull requests welcome!
 

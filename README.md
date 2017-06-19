@@ -1,8 +1,8 @@
 # hapttic
 
-## Why would I want this?
+## What is this good for?
 
-- You want to run some code in response to a webhook, like a github push ([This is what motivated me to write hapttic](/jsoendermann/pfeife)).
+- You want to run some code in response to a webhook, like a github push.
 - You have some code on your Raspberry Pi that you want to run from work (great in combination with [ngrok](https://ngrok.com/)).
 - That's pretty much it.
 
@@ -42,7 +42,7 @@ This request handling script can be run with `curl -H "X-My-Secret: SECRET" http
 
 The [`jsoendermann/hapttic`](https://hub.docker.com/r/jsoendermann/hapttic/) Dockerfile includes `jq` and `curl`, if you need any other command in your request handling script, you should create your own image.
 
-## Request JSON format
+## The Request JSON object
 
 The JSON object your request handling script gets called with is a subset of Go's `http.Request`. It's defined in [hapttic.go](https://github.com/jsoendermann/hapttic/blob/master/hapttic.go) as `marshallableRequest`. For documentation on http.Request, see [the official net/http page](https://golang.org/pkg/net/http/#Request).
 

@@ -43,7 +43,7 @@ func ensureRequestHandlingScriptExists(scriptFileName string) {
 }
 
 // handleFuncWithScriptFileName constructs our handleFunc
-func handleFuncWithScriptFileName(scriptFileName string) func(s http.ResponseWriter, req *http.Request) {
+func handleFuncWithScriptFileName(scriptFileName string, logErrorsToStderr bool) func(s http.ResponseWriter, req *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
 		ensureRequestHandlingScriptExists(scriptFileName)
 
@@ -84,6 +84,15 @@ func handleFuncWithScriptFileName(scriptFileName string) func(s http.ResponseWri
 			// If there was an error, we return a response with status code 500
 			res.WriteHeader(http.StatusInternalServerError)
 			io.WriteString(res, "500 Internal Server Error")
+
+			if logErrorsToStderr {
+				log.Println("\033[33;31m--- ERROR: ---\033[0m")
+				log.Println("\033[33;31mParams:\033[0m")
+				log.Println(string(requestJSON))
+				log.Println("\033[33;31mScript output:\033[0m")
+				log.Println(string(out))
+				log.Println("\033[33;31m---- END: ----\033[0m")
+			}
 		} else {
 			// Otherwise we return the output of our script
 			res.Write(out)
@@ -93,11 +102,12 @@ func handleFuncWithScriptFileName(scriptFileName string) func(s http.ResponseWri
 
 func main() {
 	// Parse command line args
-	printVersion := flag.Bool("v", false, "Print version and exit.")
-	printUsage := flag.Bool("u", false, "Print usage and exit")
-	host := flag.String("h", "", "The host to bind to, e.g. 0.0.0.0 or localhost.")
-	port := flag.String("p", "8080", "The port to listen on.")
+	printVersion := flag.Bool("version", false, "Print version and exit.")
+	printUsage := flag.Bool("help", false, "Print usage and exit")
+	host := flag.String("help", "", "The host to bind to, e.g. 0.0.0.0 or localhost.")
+	port := flag.String("port", "8080", "The port to listen on.")
 	userScriptFileName := flag.String("f", "./hapttic_request_handler.sh", "The script that is called to handle requests.")
+	logErrorsToStderr := flag.Bool("logErrors", false, "Log errors to stderr")
 	flag.Parse()
 
 	if *printVersion {
@@ -122,11 +132,14 @@ func main() {
 
 	ensureRequestHandlingScriptExists(scriptFileName)
 
-	http.HandleFunc("/", handleFuncWithScriptFileName(scriptFileName))
+	http.HandleFunc("/", handleFuncWithScriptFileName(scriptFileName, *logErrorsToStderr))
 
 	addr := *host + ":" + *port
 	log.Println("Thanks for using hapttic v" + version)
 	log.Println(fmt.Sprintf("Listening on %s", addr))
 	log.Println(fmt.Sprintf("Forwarding requests to %s", scriptFileName))
+	if *logErrorsToStderr {
+		log.Println("Logging errors to stderr")
+	}
 	log.Fatal(http.ListenAndServe(addr, nil))
 }

@@ -104,9 +104,9 @@ func main() {
 	// Parse command line args
 	printVersion := flag.Bool("version", false, "Print version and exit.")
 	printUsage := flag.Bool("help", false, "Print usage and exit")
-	host := flag.String("help", "", "The host to bind to, e.g. 0.0.0.0 or localhost.")
+	host := flag.String("host", "", "The host to bind to, e.g. 0.0.0.0 or localhost.")
 	port := flag.String("port", "8080", "The port to listen on.")
-	userScriptFileName := flag.String("f", "./hapttic_request_handler.sh", "The script that is called to handle requests.")
+	userScriptFileName := flag.String("file", "./hapttic_request_handler.sh", "The script that is called to handle requests.")
 	logErrorsToStderr := flag.Bool("logErrors", false, "Log errors to stderr")
 	flag.Parse()
 

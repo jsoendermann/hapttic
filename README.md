@@ -1,28 +1,62 @@
-# Why would I want this?
+# hapttic
+
+## Why would I want this?
 
 - You want to run some code in response to a webhook, like a github push ([This is what motivated me to write hapttic](/jsoendermann/pfeife)).
 - You have some code on your Raspberry Pi that you want to run from work (great in combination with [ngrok](https://ngrok.com/)).
 - That's pretty much it.
 
-# How does it work?
+## How does it work?
 
-Hapttic dumps all the information in 
+Hapttic listens for incoming HTTP connections. When it receives a connection, it dumps all relevant data (headers, path, parameters, the body and other stuff) into a JSON object and calls a bash script with this object as its parameters.
 
-- more details
-- json format
-- example script
-- example docker compose
-- how to install (in a dockerfile)
+## Show me an example
 
-# Installation
+First, create a request handler at `~/hapttic_request_handler.sh`:
 
-## Binaries
+```bash
+echo $1
+```
 
-## Docker
+Then run the following command to spin up the docker container that runs hapttic:
 
-# FAQ
+`docker run --rm -e LOG_ERRORS_TO_STDERR=1 -p 8080:8080 -v ~/hapttic_request_handler.sh:/hapttic_request_handler.sh hapttic`
 
-## Does hapttic come with support for SSL?
+Finally, run `open http://localhost:8080` to see the output of your script.
+
+## Show me a more realistic example
+
+@@@@@@
+
+```bash
+REQUEST=$1
+SECRET_TOKEN=$(jq -r '.Header."X-My-Secret"[0]' <(echo $REQUEST))
+
+if [[ $SECRET_TOKEN != "SECRET" ]]; then
+  echo "Incorrect secret token"
+  exit -1
+fi
+
+curl https://www.example.com/api/call/in/response/to/webhook
+```
+
+@@@@@@@@
+
+`curl -H "X-My-Secret: SECRET" http://localhost:8080`
+
+## Installation
+
+### Docker
+
+
+
+### Binaries
+
+## Request JSON format
+
+The JSON object your request handling script gets called with is a subset of Go's `http.Request`. It's defined in [hapttic.go](https://github.com/jsoendermann/hapttic/blob/master/hapttic.go) as `marshallableRequest`. For documentation on http.Request, see [the official net/http page](https://golang.org/pkg/net/http/#Request).
+
+## SSL Support
 
 You can add encryption by putting an nginx proxy in front of it with a docker-compose file like so:
 
@@ -59,24 +93,14 @@ services:
 
   hapttic:
     restat: always
-    image: TODO
+    image: jsoendermann/hapttic
     environment:
-      - VIRTUAL_HOST=hapttic.example.com                                                 # Replace this
-      - LETSENCRYPT_HOST=hapttic.example.com                                             # Replace this
-      - LETSENCRYPT_EMAIL=your@email.address                                             # Replace this
+      - VIRTUAL_HOST=hapttic.your.domain.com                                        # Replace this
+      - LETSENCRYPT_HOST=hapttic.your.domain.com                                    # Replace this
+      - LETSENCRYPT_EMAIL=your@email.address                                        # Replace this
+    volumes:
+      - /my-request-handler.sh:/hapttic_request_handler.sh                          # Replace this
     depends_on:
       - nginx-proxy
       - letsencrypt-nginx-proxy-companion
 ```
-
-## Will you add feature X?
-
-Probably not, the primary goal of hapttic is ease of use. Check out shell2http or adnanh/webhook for more feature rich alternatives.
-
-## Will this work on Windows?
-
-Probably not because the path to "/bin/bash" is hardcoded. Pull requests welcome!
-
-# Extra disclaimer
-
-There are obvious security implications with running a bash script in response to . Be extra careful when you use this and have a look at the source (~100 lines of Go). Hapttic comes without any warranty, as per [the license](https://github.com/jsoendermann/hapttic/blob/master/LICENSE).

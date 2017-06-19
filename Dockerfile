@@ -1,7 +1,6 @@
-MAINTAINER Jan Soendermann <jan.soendermann+git@gmail.com>
-
-
 FROM golang:alpine as build-env
+
+MAINTAINER Jan Soendermann <jan.soendermann+git@gmail.com>
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app

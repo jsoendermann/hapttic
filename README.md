@@ -20,19 +20,17 @@ echo $1
 
 Then run the following command to spin up the docker container that runs hapttic:
 
-`docker run --rm -e LOG_ERRORS_TO_STDERR=1 -p 8080:8080 -v ~/hapttic_request_handler.sh:/hapttic_request_handler.sh hapttic`
+`docker run --rm -p 8080:8080 -v ~/hapttic_request_handler.sh:/hapttic_request_handler.sh --name hapttic hapttic -file "/hapttic_request_handler.sh"`
 
 Finally, run `open http://localhost:8080` to see the output of your script.
 
 ## Show me a more realistic example
 
-@@@@@@
-
 ```bash
 REQUEST=$1
 SECRET_TOKEN=$(jq -r '.Header."X-My-Secret"[0]' <(echo $REQUEST))
 
-if [[ $SECRET_TOKEN != "SECRET" ]]; then
+if [[ "$SECRET_TOKEN" != "SECRET" ]]; then
   echo "Incorrect secret token"
   exit -1
 fi
@@ -40,17 +38,9 @@ fi
 curl https://www.example.com/api/call/in/response/to/webhook
 ```
 
-@@@@@@@@
+This request handling script can be run with `curl -H "X-My-Secret: SECRET" http://localhost:8080`
 
-`curl -H "X-My-Secret: SECRET" http://localhost:8080`
-
-## Installation
-
-### Docker
-
-
-
-### Binaries
+The [`jsoendermann/hapttic`](https://hub.docker.com/r/jsoendermann/hapttic/) Dockerfile includes `jq` and `curl`, if you need any other command in your request handling script, you should create your own image.
 
 ## Request JSON format
 
@@ -95,11 +85,12 @@ services:
     restat: always
     image: jsoendermann/hapttic
     environment:
-      - VIRTUAL_HOST=hapttic.your.domain.com                                        # Replace this
-      - LETSENCRYPT_HOST=hapttic.your.domain.com                                    # Replace this
-      - LETSENCRYPT_EMAIL=your@email.address                                        # Replace this
+      - VIRTUAL_HOST=hapttic.your.domain.com                                # Replace this
+      - LETSENCRYPT_HOST=hapttic.your.domain.com                            # Replace this
+      - LETSENCRYPT_EMAIL=your@email.address                                # Replace this
     volumes:
-      - /my-request-handler.sh:/hapttic_request_handler.sh                          # Replace this
+      - /my-request-handler.sh:/hapttic_request_handler.sh                  # Replace this
+    command: ["-file", "/hapttic_request_handler.sh"]
     depends_on:
       - nginx-proxy
       - letsencrypt-nginx-proxy-companion

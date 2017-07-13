@@ -1,18 +1,6 @@
-FROM golang:alpine as build-env
+FROM golang:alpine
 
 MAINTAINER Jan Soendermann <jan.soendermann+git@gmail.com>
-
-WORKDIR /hapttic-src
-COPY . .
-
-RUN go build -o hapttic .
-
-
-FROM alpine
-
-WORKDIR /
-
-COPY --from=build-env /hapttic-src/hapttic .
 
 RUN apk add --no-cache \
   bash \
@@ -20,7 +8,13 @@ RUN apk add --no-cache \
   curl \
   && rm -rf /var/cache/apk/*
 
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+COPY . .
+
+RUN go build -o hapttic .
+
 EXPOSE 8080
 
-ENTRYPOINT ["/hapttic"]
+ENTRYPOINT ["/usr/src/app/hapttic"]
 CMD ["-help"]

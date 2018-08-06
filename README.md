@@ -10,6 +10,10 @@
 
 Hapttic listens for incoming HTTP connections. When it receives a connection, it dumps all relevant data (headers, path, parameters, the body and other stuff) into a JSON object and calls a bash script with this object as its parameters.
 
+## Isn't this just a reinvention of CGI?
+
+The basic idea is pretty similar. The main advantage of hapttic is ease of setting up with a simple Docker image that lets you connect a shell script to a http endpoint.
+
 ## Show me an example
 
 First, create a request handler at `~/hapttic_request_handler.sh`:

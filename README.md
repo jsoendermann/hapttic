@@ -12,7 +12,7 @@ Hapttic listens for incoming HTTP connections. When it receives a connection, it
 
 ## Isn't this just a reinvention of CGI?
 
-The basic idea is pretty similar. The main advantage of hapttic is ease of setting up with a simple Docker image that lets you connect a shell script to a http endpoint.
+The basic idea is pretty similar. The main advantage of hapttic is ease of setup with a simple Docker image that lets you quickly connect a shell script to a http endpoint.
 
 ## Show me an example
 

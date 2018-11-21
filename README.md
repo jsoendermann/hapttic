@@ -24,7 +24,7 @@ echo $1
 
 Then run the following command to spin up the docker container that runs hapttic:
 
-`docker run --rm -p 8080:8080 -v ~/hapttic_request_handler.sh:/hapttic_request_handler.sh --name hapttic hapttic -file "/hapttic_request_handler.sh"`
+`docker run --rm -p 8080:8080 -v ~/hapttic_request_handler.sh:/hapttic_request_handler.sh --name hapttic jsoendermann/hapttic -file "/hapttic_request_handler.sh"`
 
 Finally, run `open http://localhost:8080` to see the output of your script.
 

@@ -86,7 +86,7 @@ services:
       - html:/usr/share/nginx/html
 
   hapttic:
-    restat: always
+    restart: always
     image: jsoendermann/hapttic
     environment:
       - VIRTUAL_HOST=hapttic.your.domain.com                                # Replace this
